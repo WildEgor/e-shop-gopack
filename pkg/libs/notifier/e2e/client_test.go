@@ -2,7 +2,7 @@ package notifier_tests
 
 import (
 	"context"
-	"github.com/WildEgor/g-core/pkg/libs/notifier"
+	"github.com/WildEgor/e-shop-gopack/pkg/libs/notifier"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

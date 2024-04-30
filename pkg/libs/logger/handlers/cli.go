@@ -3,11 +3,11 @@ package slogger
 import (
 	"context"
 	"fmt"
+	slogUtils "github.com/WildEgor/e-shop-gopack/pkg/libs/logger/utils"
 	"io"
 	"log/slog"
 	"sync"
 
-	slogUtils "github.com/WildEgor/g-core/pkg/libs/logger/utils"
 	"github.com/fatih/color"
 )
 

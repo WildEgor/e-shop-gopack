@@ -1,8 +1,8 @@
 package core_dtos_test
 
 import (
-	coreDtos "github.com/WildEgor/g-core/pkg/core/dtos"
-	"github.com/gofiber/fiber/v2"
+	coreDtos "github.com/WildEgor/e-shop-gopack/pkg/core/dtos"
+	"github.com/gofiber/fiber/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/valyala/fasthttp"
 	"os"
@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	fiberCtx *fiber.Ctx
+	fiberCtx fiber.Ctx
 	app      *fiber.App
 )
 

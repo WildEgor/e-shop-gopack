@@ -1,7 +1,7 @@
 package core_dtos
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"reflect"
 	"time"
 )
@@ -25,11 +25,11 @@ type ResponseDto struct {
 	Data        []interface{} `json:"data"`
 	TmRequest   string        `json:"tm_req"`
 	TmRequestSt time.Time     `json:"-"`
-	ctx         *fiber.Ctx
+	ctx         fiber.Ctx
 }
 
 // NewResponse wrap context
-func NewResponse(ctx *fiber.Ctx) *ResponseDto {
+func NewResponse(ctx fiber.Ctx) *ResponseDto {
 	return &ResponseDto{
 		Errors:      make([]ErrorItem, 0),
 		Data:        make([]interface{}, 0),
