@@ -12,19 +12,14 @@ type RedisConfiguer interface {
 
 type RedisConnection struct {
 	client *redis.Client
-	cfg    RedisConfiguer
 }
 
 func NewRedisDBConnection() *RedisConnection {
 	return &RedisConnection{}
 }
 
-func (rc *RedisConnection) Config(cfg RedisConfiguer) {
-	rc.cfg = cfg
-}
-
-func (rc *RedisConnection) Connect(ctx context.Context) {
-	opt, err := redis.ParseURL(rc.cfg.URI())
+func (rc *RedisConnection) Connect(ctx context.Context, cfg RedisConfiguer) {
+	opt, err := redis.ParseURL(cfg.URI())
 	if err != nil {
 		slog.Error("fail parse url", err)
 		panic(err)

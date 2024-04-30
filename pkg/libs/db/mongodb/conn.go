@@ -22,11 +22,7 @@ func NewMongoConnection() *MongoConnection {
 	return &MongoConnection{}
 }
 
-func (mc *MongoConnection) Config(cfg MongoConfiguer) {
-	mc.cfg = cfg
-}
-
-func (mc *MongoConnection) Connect(ctx context.Context) {
+func (mc *MongoConnection) Connect(ctx context.Context, cfg MongoConfiguer) {
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mc.cfg.URI()))
 	if err != nil {
 		slog.Error("fail connect to mongo", err)
@@ -42,6 +38,7 @@ func (mc *MongoConnection) Connect(ctx context.Context) {
 	slog.Info("success connect to mongoDB")
 
 	mc.client = client
+	mc.cfg = cfg
 }
 
 func (mc *MongoConnection) Disconnect(ctx context.Context) {
