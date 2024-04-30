@@ -3,11 +3,11 @@ package notifier_tests
 import (
 	"context"
 	"fmt"
+	"github.com/WildEgor/e-shop-gopack/pkg/libs/notifier"
 	"log"
 	"os"
 	"testing"
 
-	"github.com/WildEgor/g-core/pkg/libs/notifier"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/rabbitmq"
 )

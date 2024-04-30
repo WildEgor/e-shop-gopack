@@ -2,8 +2,8 @@ package logger_tests
 
 import (
 	"errors"
-	slogger "github.com/WildEgor/g-core/pkg/libs/logger/handlers"
-	"github.com/WildEgor/g-core/pkg/libs/logger/models"
+	slogger "github.com/WildEgor/e-shop-gopack/pkg/libs/logger/handlers"
+	"github.com/WildEgor/e-shop-gopack/pkg/libs/logger/models"
 	"log/slog"
 	"testing"
 )

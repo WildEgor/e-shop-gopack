@@ -3,7 +3,7 @@ package slogger
 import (
 	"context"
 	"fmt"
-	"github.com/WildEgor/g-core/pkg/libs/logger/models"
+	"github.com/WildEgor/e-shop-gopack/pkg/libs/logger/models"
 	"io"
 	"log/slog"
 	"os"
