@@ -18,27 +18,18 @@ type MongoConnection struct {
 	cfg    MongoConfiguer
 }
 
-func NewMongoConnection(
-	cfg MongoConfiguer,
-) *MongoConnection {
-	conn := &MongoConnection{
-		nil,
-		cfg,
-	}
-
-	conn.Connect()
-
-	return conn
+func NewMongoConnection() *MongoConnection {
+	return &MongoConnection{}
 }
 
-func (mc *MongoConnection) Connect() {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mc.cfg.URI()))
+func (mc *MongoConnection) Connect(ctx context.Context, cfg MongoConfiguer) {
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mc.cfg.URI()))
 	if err != nil {
 		slog.Error("fail connect to mongo", err)
 		panic(err)
 	}
 
-	err = client.Ping(context.TODO(), nil)
+	err = client.Ping(ctx, nil)
 	if err != nil {
 		slog.Error("fail connect to mongo", err)
 		panic(err)
@@ -47,14 +38,15 @@ func (mc *MongoConnection) Connect() {
 	slog.Info("success connect to mongoDB")
 
 	mc.client = client
+	mc.cfg = cfg
 }
 
-func (mc *MongoConnection) Disconnect() {
+func (mc *MongoConnection) Disconnect(ctx context.Context) {
 	if mc.client == nil {
 		return
 	}
 
-	if err := mc.client.Disconnect(context.TODO()); err != nil {
+	if err := mc.client.Disconnect(ctx); err != nil {
 		slog.Error("fail disconnect to mongo", err)
 		panic(err)
 	}

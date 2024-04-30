@@ -14,26 +14,16 @@ type PostgresConfiguer interface {
 
 // PostgresConnection holds db conn
 type PostgresConnection struct {
-	DB  *pgxpool.Pool
-	cfg PostgresConfiguer
+	DB *pgxpool.Pool
 }
 
-func NewPostgresConnection(
-	cfg PostgresConfiguer,
-) *PostgresConnection {
-
-	conn := &PostgresConnection{
-		cfg: cfg,
-	}
-
-	conn.Connect()
-
-	return conn
+func NewPostgresConnection() *PostgresConnection {
+	return &PostgresConnection{}
 }
 
 // Connect make connect and ping db
-func (p *PostgresConnection) Connect() {
-	config, err := pgxpool.ParseConfig(p.cfg.URI())
+func (p *PostgresConnection) Connect(ctx context.Context, cfg PostgresConfiguer) {
+	config, err := pgxpool.ParseConfig(cfg.URI())
 	if err != nil {
 		slog.Error("fail parse config", models.LogEntryAttr(&models.LogEntry{
 			Err: err,
@@ -51,13 +41,13 @@ func (p *PostgresConnection) Connect() {
 
 	p.DB = dbpool
 
-	if err := dbpool.Ping(context.TODO()); err != nil {
+	if err := dbpool.Ping(ctx); err != nil {
 		p.DB.Close()
 	}
 }
 
 // Close close connection
-func (p *PostgresConnection) Close() {
+func (p *PostgresConnection) Disconnect(ctx context.Context) {
 	if p.DB != nil {
 		p.DB.Close()
 	}
