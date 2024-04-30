@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"context"
 	"github.com/go-redis/redis"
 	"log/slog"
 )
@@ -14,20 +15,15 @@ type RedisConnection struct {
 	cfg    RedisConfiguer
 }
 
-func NewRedisDBConnection(
-	cfg RedisConfiguer,
-) *RedisConnection {
-	conn := &RedisConnection{
-		nil,
-		cfg,
-	}
-
-	conn.Connect()
-
-	return conn
+func NewRedisDBConnection() *RedisConnection {
+	return &RedisConnection{}
 }
 
-func (rc *RedisConnection) Connect() {
+func (rc *RedisConnection) Config(cfg RedisConfiguer) {
+	rc.cfg = cfg
+}
+
+func (rc *RedisConnection) Connect(ctx context.Context) {
 	opt, err := redis.ParseURL(rc.cfg.URI())
 	if err != nil {
 		slog.Error("fail parse url", err)
@@ -36,7 +32,7 @@ func (rc *RedisConnection) Connect() {
 
 	rc.client = redis.NewClient(opt)
 
-	if _, err := rc.client.Ping().Result(); err != nil {
+	if _, err := rc.client.WithContext(ctx).Ping().Result(); err != nil {
 		slog.Error("fail connect to redis ", err)
 		panic(err)
 	}
@@ -44,12 +40,12 @@ func (rc *RedisConnection) Connect() {
 	slog.Info("success connect to redis")
 }
 
-func (rc *RedisConnection) Disconnect() {
+func (rc *RedisConnection) Disconnect(ctx context.Context) {
 	if rc.client == nil {
 		return
 	}
 
-	if err := rc.client.Close(); err != nil {
+	if err := rc.client.WithContext(ctx).Close(); err != nil {
 		slog.Error("fail disconnect redis", err)
 		return
 	}
