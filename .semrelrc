@@ -15,7 +15,7 @@
     "provider": {
       "name": "github",
       "options": {
-        "slug": "wildegor/g-core"
+        "slug": "wildegor/e-shop-gopack"
       }
     },
     "files-updater": {
