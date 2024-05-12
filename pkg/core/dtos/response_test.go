@@ -2,6 +2,7 @@ package core_dtos_test
 
 import (
 	coreDtos "github.com/WildEgor/e-shop-gopack/pkg/core/dtos"
+	fiberold "github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/valyala/fasthttp"
@@ -10,15 +11,21 @@ import (
 )
 
 var (
-	fiberCtx fiber.Ctx
-	app      *fiber.App
+	fiberCtx    fiber.Ctx
+	fiberoldCtx *fiberold.Ctx
+	app         *fiber.App
+	oldApp      *fiberold.App
 )
 
 func TestMain(m *testing.M) {
 	app = fiber.New()
 	defer app.Shutdown()
-
 	fiberCtx = app.AcquireCtx(&fasthttp.RequestCtx{})
+
+	oldApp = fiberold.New()
+	defer oldApp.Shutdown()
+
+	fiberoldCtx = oldApp.AcquireCtx(&fasthttp.RequestCtx{})
 
 	code := m.Run()
 	os.Exit(code)
@@ -26,6 +33,14 @@ func TestMain(m *testing.M) {
 
 func TestWrapResponse(t *testing.T) {
 	resp := coreDtos.NewResponse(fiberCtx)
+
+	err := resp.JSON()
+
+	assert.Nil(t, err)
+}
+
+func TestOldWrapResponse(t *testing.T) {
+	resp := coreDtos.NewResp(coreDtos.WithOldContext(fiberoldCtx))
 
 	err := resp.JSON()
 

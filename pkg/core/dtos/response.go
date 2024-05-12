@@ -1,6 +1,7 @@
 package core_dtos
 
 import (
+	fiberold "github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v3"
 	"reflect"
 	"time"
@@ -17,24 +18,64 @@ type ErrorItem struct {
 	Message string `json:"message"`
 }
 
+type ResponseOptions struct {
+	ctx    fiber.Ctx
+	oldCtx *fiberold.Ctx
+}
+
 // ResponseDto generic response DTO
 type ResponseDto struct {
+	ResponseOptions
+
 	Status      string        `json:"status"`
 	Message     string        `json:"message"`
 	Errors      []ErrorItem   `json:"errors"`
 	Data        []interface{} `json:"data"`
 	TmRequest   string        `json:"tm_req"`
 	TmRequestSt time.Time     `json:"-"`
-	ctx         fiber.Ctx
 }
 
-// NewResponse wrap context
+type Option func(o *ResponseOptions)
+
+func WithOldContext(ctx *fiberold.Ctx) Option {
+	return func(o *ResponseOptions) {
+		o.oldCtx = ctx
+	}
+}
+
+func WithContext(ctx fiber.Ctx) Option {
+	return func(o *ResponseOptions) {
+		o.ctx = ctx
+	}
+}
+
+// NewResponse wrap context (compatible only with fiber v3)
 func NewResponse(ctx fiber.Ctx) *ResponseDto {
 	return &ResponseDto{
 		Errors:      make([]ErrorItem, 0),
 		Data:        make([]interface{}, 0),
 		TmRequestSt: time.Now(),
-		ctx:         ctx,
+
+		ResponseOptions: ResponseOptions{
+			ctx: ctx,
+		},
+	}
+}
+
+// NewResp wrap context (compatible both for v2 and v3)
+func NewResp(opts ...Option) *ResponseDto {
+	options := &ResponseOptions{}
+
+	for _, o := range opts {
+		o(options)
+	}
+
+	return &ResponseDto{
+		Errors:      make([]ErrorItem, 0),
+		Data:        make([]interface{}, 0),
+		TmRequestSt: time.Now(),
+
+		ResponseOptions: *options,
 	}
 }
 
@@ -54,14 +95,28 @@ func (r *ResponseDto) SetMessage(text string) {
 
 // SetHeaders response headers
 func (r *ResponseDto) SetHeaders(headers map[string]string) {
-	for _, header := range headers {
-		r.ctx.Set(header, headers[header])
+	if r.ResponseOptions.ctx != nil {
+		for _, header := range headers {
+			r.ctx.Set(header, headers[header])
+		}
+	}
+
+	if r.ResponseOptions.oldCtx != nil {
+		for _, header := range headers {
+			r.oldCtx.Set(header, headers[header])
+		}
 	}
 }
 
 // SetStatus response status
 func (r *ResponseDto) SetStatus(status int) {
-	r.ctx.Status(status)
+	if r.ctx != nil {
+		r.ctx.Status(status)
+	}
+
+	if r.oldCtx != nil {
+		r.oldCtx.Status(status)
+	}
 }
 
 // SetData response data
@@ -79,9 +134,18 @@ func (r *ResponseDto) JSON() error {
 		r.Status = OkStatus
 	}
 
-	err := r.ctx.JSON(r)
-	if err != nil {
-		return err
+	if r.ctx != nil {
+		err := r.ctx.JSON(r)
+		if err != nil {
+			return err
+		}
+	}
+
+	if r.oldCtx != nil {
+		err := r.oldCtx.JSON(r)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
