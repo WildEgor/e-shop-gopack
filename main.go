@@ -11,6 +11,6 @@ func main() {
 	logger := slogger.NewLogger()
 	slog.SetDefault(logger)
 
-	slog.Info("Start")
+	slog.Info("Connect")
 	os.Exit(1)
 }
