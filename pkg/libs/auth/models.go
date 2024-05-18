@@ -15,3 +15,7 @@ type Options struct {
 type options struct {
 	Options
 }
+
+type IOptions interface {
+	Options() *Options
+}

@@ -1,14 +1,17 @@
 package auth
 
 import (
+	"context"
 	"github.com/WildEgor/e-shop-gopack/pkg/libs/auth/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Client struct {
-	API     pb.AuthServiceClient
 	options *options
+
+	Validate  func(ctx context.Context, in *pb.ValidateTokenRequest, opts ...grpc.CallOption) (*pb.UserData, error)
+	FindByIds func(ctx context.Context, in *pb.FindByIdsRequest, opts ...grpc.CallOption) (*pb.FindByIdsResponse, error)
 }
 
 func WithDSN(dsn string) Option {
@@ -30,9 +33,10 @@ func NewClientWithOptions(opts ...Option) *Client {
 }
 
 // NewClient can be injectable via wire
-func NewClient(cfg *Options) *Client {
+func NewClient(cfg IOptions) *Client {
 	options := &options{}
-	options.DSN = cfg.DSN
+	opts := cfg.Options()
+	options.DSN = opts.DSN
 
 	return &Client{
 		options: options,
@@ -45,6 +49,9 @@ func (c *Client) Connect() error {
 		return ErrEstablishGRPCConnect
 	}
 
-	c.API = pb.NewAuthServiceClient(conn)
+	service := pb.NewAuthServiceClient(conn)
+	c.Validate = service.ValidateToken
+	c.FindByIds = service.FindByIds
+
 	return nil
 }
