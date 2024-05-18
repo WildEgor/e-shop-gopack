@@ -1,0 +1,5 @@
+version: '3'
+
+tasks:
+  auth-proto:
+    cmd: protoc --proto_path=./api proto/auth.proto --go_out=./pkg/libs/auth --go-grpc_out=./pkg/libs/auth
