@@ -1,8 +1,10 @@
 package core_dtos
 
 import (
+	"fmt"
 	fiberold "github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v3"
+	"net/http"
 	"reflect"
 	"time"
 )
@@ -31,6 +33,7 @@ type ResponseDto struct {
 	Message     string        `json:"message"`
 	Errors      []ErrorItem   `json:"errors"`
 	Data        []interface{} `json:"data"`
+	file        []byte        `json:"-"`
 	TmRequest   string        `json:"tm_req"`
 	TmRequestSt time.Time     `json:"-"`
 }
@@ -122,6 +125,40 @@ func (r *ResponseDto) SetStatus(status int) {
 // SetData response data
 func (r *ResponseDto) SetData(data interface{}) {
 	r.Data = r.reflectData(data)
+}
+
+// SetFile name and data
+func (r *ResponseDto) SetFile(name string, data []byte) {
+	if r.ctx != nil {
+		r.ctx.Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name))
+	}
+
+	if r.oldCtx != nil {
+		r.oldCtx.Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name))
+	}
+
+	r.file = data
+}
+
+// File finalize response and convert to file
+func (r *ResponseDto) File() error {
+	if r.ctx != nil {
+		r.ctx.Set("Content-Type", http.DetectContentType(r.file))
+		err := r.ctx.Send(r.file)
+		if err != nil {
+			return err
+		}
+	}
+
+	if r.oldCtx != nil {
+		r.oldCtx.Set("Content-Type", http.DetectContentType(r.file))
+		err := r.oldCtx.Send(r.file)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // JSON finalize response and convert to Json
